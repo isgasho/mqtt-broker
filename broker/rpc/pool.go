@@ -1,8 +1,6 @@
 package rpc
 
 import (
-	"log"
-
 	grpc "google.golang.org/grpc"
 )
 
@@ -34,12 +32,10 @@ func NewPool(addr string) (*Pool, error) {
 		jobs: make(chan chan JobWrap),
 		quit: make(chan struct{}),
 	}
-	log.Printf("INFO: connecting to addr %s", addr)
 	conn, err := grpc.Dial(addr, grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {
 		return nil, err
 	}
-	log.Printf("INFO: connected to addr %s", addr)
 	go func() {
 		<-c.quit
 		conn.Close()
@@ -47,7 +43,6 @@ func NewPool(addr string) (*Pool, error) {
 
 	client := NewBrokerServiceClient(conn)
 	jobs := make(chan JobWrap)
-	log.Print("INFO: starting workers")
 	go func() {
 		for {
 			select {
@@ -65,6 +60,5 @@ func NewPool(addr string) (*Pool, error) {
 			}
 		}
 	}()
-	log.Print("INFO: started workers")
 	return c, nil
 }
