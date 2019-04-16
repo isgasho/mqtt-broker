@@ -45,6 +45,14 @@ var now = func() int64 {
 	return time.Now().UnixNano()
 }
 
+type subscriptionWrapper struct {
+	ID        string
+	Tenant    string
+	SessionID string
+	Peer      string
+	pb        *Subscription
+}
+
 func NewMemDBStore(mesh cluster.Mesh) (Store, error) {
 	db, err := memdb.NewMemDB(&memdb.DBSchema{
 		Tables: map[string]*memdb.TableSchema{
@@ -219,7 +227,13 @@ func (m *memDBStore) insert(messages []*Subscription) error {
 				})
 				m.patternIndex.Remove(message.Tenant, message.ID, message.Pattern)
 			}
-			err := tx.Insert(table, message)
+			err := tx.Insert(table, subscriptionWrapper{
+				ID:        message.ID,
+				Peer:      message.Peer,
+				SessionID: message.SessionID,
+				Tenant:    message.Tenant,
+				pb:        message,
+			})
 			if err != nil {
 				return err
 			}

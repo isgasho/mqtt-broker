@@ -25,10 +25,11 @@ func (m *memDBStore) first(tx *memdb.Txn, index string, value ...interface{}) (*
 	if err != nil {
 		return res, err
 	}
-	res, ok = data.(*Subscription)
+	wrapper, ok := data.(subscriptionWrapper)
 	if !ok {
 		return res, errors.New("invalid type fetched")
 	}
+	res = wrapper.pb
 	return res, nil
 }
 func (m *memDBStore) all(tx *memdb.Txn, index string, value ...interface{}) (SubscriptionList, error) {
@@ -42,12 +43,12 @@ func (m *memDBStore) all(tx *memdb.Txn, index string, value ...interface{}) (Sub
 		if data == nil {
 			return set, nil
 		}
-		res, ok := data.(*Subscription)
+		res, ok := data.(subscriptionWrapper)
 		if !ok {
 			return set, errors.New("invalid type fetched")
 		}
-		if res.IsAdded() {
-			set.Subscriptions = append(set.Subscriptions, res)
+		if res.pb.IsAdded() {
+			set.Subscriptions = append(set.Subscriptions, res.pb)
 		}
 	}
 }
