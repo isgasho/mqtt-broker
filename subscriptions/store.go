@@ -21,6 +21,7 @@ type Store interface {
 	BySession(id string) (SubscriptionList, error)
 	Sessions() ([]string, error)
 	Create(message *Subscription) error
+	CreateLocal(message *UserSubscription) error
 	Delete(id string) error
 	On(event string, handler func(*Subscription)) func()
 	DumpSubscriptions() *SubscriptionList
@@ -253,6 +254,9 @@ func (m *memDBStore) Delete(id string) error {
 func (m *memDBStore) Create(message *Subscription) error {
 	message.LastAdded = now()
 	return m.state.Upsert(message)
+}
+func (m *memDBStore) CreateLocal(message *UserSubscription) error {
+	return nil
 }
 
 func (s *memDBStore) On(event string, handler func(*Subscription)) func() {
